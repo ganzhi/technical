@@ -1,0 +1,138 @@
+<project name="std.build.xml" default="build" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<property environment="env"/>
+	<property name="src.dir" value="src" />
+	<property name="test.dir" value="test" />
+	<property name="output.dir" value="target" />
+	<property name="bin.dir" value="bin" />
+	<property name="lib.dir" value="lib" />
+	<property name="docs.dir" value="${output.dir}/doc" />
+	<property name="junit.out.dir" value="junit.out" />
+	<property name="instrumented.dir" value="instrume" />
+	<property name="coverage.dir" value="${repository}/coverage" />
+
+	<ivy:settings file="${repository}/ivysettings.xml" />
+
+	<path id="build.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<path id="test.classpath">
+		<pathelement path="${bin.dir}" />
+		<path refid="build.classpath" />
+	</path>
+	
+	<target name="set-default-env-identity" unless="env.UCONNECT_ENV">
+		<property name="env.UCONNECT_ENV" value="local"/>
+	</target>
+	
+	<target name="set-env-property" depends="set-default-env-identity">
+		<property file="${repository}/config/env.${env.UCONNECT_ENV}.properties"/>
+		<echo>
+			This build is running with configurations as show below:
+			jboss.hostname = ${jboss.hostname}
+			jboss.username = ${jboss.username}
+			jboss.homedir = ${jboss.homedir} 
+			mysql.hostname = ${mysql.hostname} 
+			mysql.username = ${mysql.username} 
+			mysql.password = ${mysql.password} 
+			portal.hostname = ${portal.hostname}
+		</echo>
+	</target>
+
+	<target name="init" depends="set-env-property">
+		<tstamp>
+			<format property="time" pattern="dd-MMMM-yyyy @ hh:mm:ss" locale="en,NZ" />
+		</tstamp>
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${output.dir}" />
+		<mkdir dir="${lib.dir}" />		
+	</target>
+
+	<target name="resolve" depends="init" description="--> retreive dependencies with ivy">
+		<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]" conf="runtime" />
+		<ivy:retrieve pattern="${testlib.dir}/[artifact]-[revision].[ext]" conf="test" />
+	</target>
+
+	<target name="clean" description="Clean all temperatory files">
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${bin.dir}/" />
+		</delete>
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${output.dir}/" />
+		</delete>
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${lib.dir}/" />
+		</delete>
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${testlib.dir}/" />
+		</delete>
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${junit.out.dir}/" />
+		</delete>
+		<delete quiet="yes" includeEmptyDirs="true">
+			<fileset dir="${instrumented.dir}/" />
+		</delete>
+	</target>
+
+	<target name="build" depends="clean,init,package">
+	</target>
+
+	<target name="pre-compile-if" if="need-pre-compile">
+		<antcall target="pre-compile" />
+	</target>
+
+	<target name="compile" depends="init,resolve,pre-compile-if">
+		<javac source="1.6" target="1.6" srcdir="${src.dir}" destdir="${bin.dir}" debug="on" deprecation="true" includeantruntime="false">
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+
+	<target name="package" depends="compile">
+		<jar destfile="${output.dir}/${ant.project.name}.jar">
+			<manifest>
+				<attribute name="Manifest-Version" value="${version}" />
+				<attribute name="User-Created-By" value="${user.name}" />
+				<attribute name="Date-Created-By" value="${time}" />
+			</manifest>
+			<fileset dir="${bin.dir}">
+			</fileset>
+			<zipfileset dir="${src.dir}">
+				<exclude name="**/*.java" />
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="publish" depends="build" description="--> publish artifacts to repository">
+		<ivy:buildnumber organisation="${ivy.organisation}" module="${ivy.module}" resolver="pubRep" />
+        <echo>
+    Publish Info:
+        Organisation: ${ivy.organisation}
+        Module: ${ivy.module}
+        Version: ${ivy.new.revision}
+        </echo>
+		<ivy:publish artifactspattern="${output.dir}/${ant.project.name}.[ext]" 
+			resolver="locallib" pubrevision="${ivy.new.revision}" 
+			status="release" forcedeliver="true" />
+	</target>
+
+	<property name="findbugs.home" value="/opt/findbugs-2.0.0" />
+
+	<target name="findbugs" depends="package">
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
+		<findbugs home="${findbugs.home}" output="xml" outputFile="findbugs_result.xml" includeFilter="${repository}/findbug_filter.xml">
+			<auxClasspath>
+				<path refid="build.classpath" />
+			</auxClasspath>
+			<sourcePath path="${src.dir}" />
+			<class location="${bin.dir}" />
+		</findbugs>
+	</target>
+	
+	<target name="deploy" depends="package" description="--> dummy task for preventing warning from undeployable projects">
+	</target>
+	
+	<target name="deploy_local" depends="package" description="--> dummy task for preventing warning from undeployable projects">
+	</target>
+</project>

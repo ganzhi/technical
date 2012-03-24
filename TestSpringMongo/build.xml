@@ -1,0 +1,43 @@
+<project name="nz.co.uconnect.platform" default="build">
+	<property file="build.properties" />
+	<property name="src.dir" value="src" />
+	<property name="bin.dir" value="bin" />
+	<property name="lib.dir" value="lib" />
+	<property name="testlib.dir" value="depends.test" />
+	<property name="workspace" value=".." />
+    <property name="repository" value="." />
+
+	<import file="${repository}/std.build.xml" />
+
+	<path id="build.classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+	</path>
+
+	<target name="copyfiles" description="Copies the App Engine JARs to the WAR.">
+		<copy todir="${bin.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile" depends="clean, resolve,copyfiles" description="Compiles Java source and copies other source files.">
+		<mkdir dir="${bin.dir}" />
+		<javac source="1.6" target="1.6" srcdir="${src.dir}" destdir="${bin.dir}" classpathref="build.classpath" debug="on" includeAntRuntime="false" />
+	</target>
+
+	<target name="build" depends="clean, package">
+	</target>
+
+	<target name="clean">
+		<delete dir="${lib.dir}" quiet="yes" />
+		<delete dir="${bin.dir}" quiet="yes" />
+        <delete file="${ant.project.name}.jar" quiet="yes" />
+	</target>
+
+	<target name="package" depends="compile">
+        <jar destfile="${ant.project.name}.jar">
+            <fileset dir="bin"/>
+		</jar>
+	</target>
+</project>

@@ -1,0 +1,30 @@
+<ivy-module version="1.0">
+    <info organisation="org.ganzhi" module="TestSpringMongodb"/>
+    <configurations>
+    	<conf name="runtime"  description="for runtime execution of the module"/>
+    	<conf name="test" visibility="private" description="for testing the module"/>
+    </configurations>
+    <publications>
+	    <artifact ext="jar"/>
+    </publications>
+    <dependencies defaultconf="runtime" defaultconfmapping="runtime->default;test->default">
+  		<dependency name="spring-asm" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-beans" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-context" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-core" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-expression" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-jdbc" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-orm" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-tx" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-web" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		<dependency name="spring-aop" org="org.springframework" rev="3.1.1.RELEASE"/>
+   		<dependency name="spring-aspects" org="org.springframework" rev="3.1.1.RELEASE"/>
+  		
+  		
+  		<dependency name="spring-data-commons-core" org="org.springframework.data" rev="1.2.1.RELEASE"/>
+		<dependency name="spring-data-mongodb" org="org.springframework.data" rev="1.0.1.RELEASE"/>
+		<dependency name="mongo-java-driver" org="org.mongodb" rev="2.7.3"/>
+		<dependency name="cglib" org="cglib" rev="2.2.2"/>
+		<dependency name="asm" org="nz.co.propellerhead" rev="3.1"/>
+    </dependencies>
+</ivy-module>

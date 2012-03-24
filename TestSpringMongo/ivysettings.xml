@@ -1,0 +1,20 @@
+<ivysettings>
+    <properties file="${ivy.settings.dir}/ivysettings.properties"/>
+    <settings defaultResolver="projects"/>
+    <caches defaultCacheDir="${ivy.settings.dir}/../../ivy-cache"></caches>
+    <credentials host="maven.propellerhead.co.nz" realm="Artifactory Realm" username="admin" passwd="password"/>
+    <resolvers>
+        <chain name="projects">
+	        <filesystem name="local">
+        	    <artifact pattern="${artifact.dir}/[artifact]-[revision].[ext]" />
+    	        <ivy pattern="${artifact.dir}.xml/[module]-[revision].xml" />
+	        </filesystem>
+            <ibiblio name="locallib" m2compatible="true" root="http://maven.propellerhead.co.nz/libs-releases-local" />
+		    <ibiblio name="maven" m2compatible="true" usepoms="false"/>" />
+		    <ibiblio name="smartgwt" m2compatible="true" root="http://www.smartclient.com/maven2"/>" />
+		</chain>		
+        <ibiblio name="pubRep" m2compatible="true" root="http://maven.propellerhead.co.nz/libs-releases-local" useMavenMetadata="false"/>
+    </resolvers>
+    <modules>
+    </modules>
+</ivysettings>
